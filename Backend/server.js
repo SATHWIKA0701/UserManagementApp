@@ -10,25 +10,23 @@ const app = express();
 
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.FRONTEND_URL
-    ],
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: ["http://localhost:5173", process.env.FRONTEND_URL],
+  credentials: true
+}));
 
-mongoose
-  .connect(process.env.DB_URL)
-  .then(() => console.log("DB connected"))
-  .catch((err) => console.log(err));
+// MongoDB connection
+mongoose.connect(process.env.DB_URL)
+.then(()=>console.log("DB connected"))
+.catch(err=>console.log(err));
 
+// Routes
 app.use("/user-api", userApp);
 
-app.get("/", (req, res) => {
-  res.send("Backend running");
+// Test route
+app.get("/", (req,res)=>{
+  res.send("Backend running successfully");
 });
+
 
 export default app;

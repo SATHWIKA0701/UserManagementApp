@@ -1,68 +1,166 @@
-// Create mini-express app
+// Create mini express app (router)
 import exp from "express";
 import { UserModel } from "../Models/UserModel.js";
-export const UserApp = exp.Router();
 
-//USER API ROUTES
+const userApp = exp.Router();
+
+// ---------------- USER API ROUTES ----------------
 
 // Create User
-UserApp.post("/users", async (req, res) => {
-  //get new user
-  const newUser = req.body;
-  //create user document
-  const newUserDocument = new UserModel(newUser);
-  //save new user
-  let user = await newUserDocument.save();
-  //send res
-  res.status(201).json({ message: "User created", payload: user });
+userApp.post("/users", async (req, res) => {
+  try {
+    const newUser = req.body;
+
+    const newUserDocument = new UserModel(newUser);
+
+    const savedUser = await newUserDocument.save();
+
+    res.status(201).json({
+      message: "User created",
+      payload: savedUser
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating user",
+      error: error.message
+    });
+  }
 });
+
 
 // Read all Users
-UserApp.get("/users", async (req, res) => {
-  //read all users
-  let usersList = await UserModel.find({ status: true });
-  //send res
-  res.status(200).json({ message: "users", payload: usersList });
+userApp.get("/users", async (req, res) => {
+  try {
+    const usersList = await UserModel.find({ status: true });
+
+    res.status(200).json({
+      message: "Users list",
+      payload: usersList
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching users",
+      error: error.message
+    });
+  }
 });
+
 
 // Read a User by ID
-UserApp.get("/users/:id", async (req, res) => {
-  //get user if from url
-  let uid = req.params.id;
-  //find user by id
-  let user = await UserModel.findOne({ _id: uid, status: true });
-  //check user
-  if (!user) {
-    return res.status(404).json({ message: "user not found" });
+userApp.get("/users/:id", async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    const user = await UserModel.findOne({
+      _id: uid,
+      status: true
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "User found",
+      payload: user
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching user",
+      error: error.message
+    });
   }
-  //send res
-  res.status(200).json({ message: "user found", payload: user });
 });
 
-// Delete a User by ID
-UserApp.delete("/users/:id", async (req, res) => {
-  //get user if from url
-  let uid = req.params.id;
-  //find user and chage status to false
-  let user = await UserModel.findByIdAndUpdate(uid, { $set: { status: false } });
-  //check user
-  if (!user) {
-    return res.status(404).json({ message: "user not found" });
+
+// Delete User (soft delete)
+userApp.delete("/users/:id", async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    const user = await UserModel.findByIdAndUpdate(
+      uid,
+      { $set: { status: false } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "User removed"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting user",
+      error: error.message
+    });
   }
-  //send res
-  res.status(200).json({ message: "User removed" });
 });
 
-//Activate User(change status to true)
-UserApp.patch("/users/:id", async (req, res) => {
-  //get user if from url
-  let uid = req.params.id;
-  //find user and chage status to false
-  let user = await UserModel.findByIdAndUpdate(uid, { $set: { status: true } }, { new: true });
 
-  //send res
-  res.status(200).json({ message: "User activated", payload: user });
+// Activate User
+userApp.patch("/users/:id", async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    const user = await UserModel.findByIdAndUpdate(
+      uid,
+      { $set: { status: true } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "User activated",
+      payload: user
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error activating user",
+      error: error.message
+    });
+  }
 });
-//PUT(complete change) & PATCH(partial changes)
 
-// Update user by ID
+
+// Update User
+userApp.put("/users/:id", async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      uid,
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "User updated",
+      payload: updatedUser
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating user",
+      error: error.message
+    });
+  }
+});
+
+
+// Export router (IMPORTANT FIX)
+export default userApp;
