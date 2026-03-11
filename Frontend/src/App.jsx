@@ -12,7 +12,7 @@ function App() {
       element: <RootLayout />,
       children: [
         {
-          path: "",
+          index: true,
           element: <Home />,
         },
         {
@@ -30,7 +30,12 @@ function App() {
       ],
     },
   ]);
-  return <RouterProvider router={routerObj} />;
+
+  return (
+    <div className="min-h-screen w-full">
+      <RouterProvider router={routerObj} />
+    </div>
+  );
 }
 
 export default App;
