@@ -10,9 +10,15 @@ config();
 // Create HTTP Server
 const app = exp();
 //add cors
-app.use(cors({
-  origin:['http://localhost:5173']
-}))
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL
+    ],
+    credentials: true
+  })
+);
 // Add body parser middleware
 app.use(exp.json());
 // Forward req to UserAPI if path starts with /user-api
@@ -24,7 +30,7 @@ async function connectDB() {
     await connect(process.env.DB_URL);
     console.log("Connected to DB");
     //assign port number
-    const port = process.env.PORT;
+    const port = process.env.PORT || 4000;
     app.listen(port, () => console.log(`Server on port ${port}`));
   } catch (err) {
     console.log("err in DB connection :", err);

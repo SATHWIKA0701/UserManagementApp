@@ -17,7 +17,7 @@ function AddUser() {
   const onUserCreate = async (newUser) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/user-api/users", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/user-api/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
